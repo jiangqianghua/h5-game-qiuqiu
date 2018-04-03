@@ -1,5 +1,6 @@
 include('map.js')
 include('directionsimulator.js')
+include('ball.js')
 var game ;
 var isOver = false;
 const raf = window.requestAnimationFrame
@@ -14,6 +15,7 @@ const raf = window.requestAnimationFrame
 var Game = function(){
 	var map ;
 	var directSimulator ;
+	var balls = [];
 	this.init = function(){
 		canvas = e('game') ;
 		width = canvas.width;
@@ -36,11 +38,30 @@ var Game = function(){
 
 	this.render = function(){
 		map.render();
+
+		for(var i = 0 ; i < balls.length ; i++){
+			var ball = balls[i];
+			ball.update();
+			ball.render();
+		}
+
+
 		directSimulator.render();
 	}
 
 	this.onAngleCallback = function(angle){
-		log("angle="+angle);
+		log(angle);
+		for(var i = 0 ; i < balls.length ; i++){
+			var ball = balls[i];
+			ball.direct(angle);
+		}
+
+	}
+
+	this.createBalls = function(){
+		var ball = new Ball();
+		ball.init(canvas,{x:100,y:100});
+		balls.push(ball);
 	}
 }
 
@@ -59,6 +80,7 @@ window.onload = function(){
 	game.init();
 	game.initData();
 	game.initEvent();
+	game.createBalls();
 	(function animate() {
 		if(isOver)
 			return ;

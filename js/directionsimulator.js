@@ -8,6 +8,8 @@ var DirectionSimulator = function(){
 	var startTouch = false ;
 	var onAngleListener = null ;
 	var offsetX = 0, offsetY = 0;
+	var startTouchId = -1 ;
+
 	this.init = function(canvas,options){
 		this.canvas = canvas;
 		this.ctx = this.canvas.getContext('2d');
@@ -46,49 +48,71 @@ var DirectionSimulator = function(){
 	var initEvent = function(){
 		window.addEventListener('touchstart', function(e) {
 	        e.preventDefault();
-        	var startX = e.touches[0].pageX;
-        	var startY = e.touches[0].pageY;
-        	// 计算到圆心的继续是否超出
-        	var dist = dist1({x:startX,y:startY},{x:x,y:y});
-        	log(dist);
-			if(dist < R)
-			{
-				startTouch = true ;
-			}
+	        // 增加多点触控
+	        for(var i = 0 ; i < e.targetTouches.length ; i++){
+	        	var touch = e.targetTouches[i];
+		        log("touchstart:"+touch.identifier);
+	        	var startX = e.touches[i].pageX;
+	        	var startY = e.touches[i].pageY;
+	        	// 计算到圆心的继续是否超出
+	        	var dist = dist1({x:startX,y:startY},{x:x,y:y});
+	        	//log(dist);
+				if(dist < R)
+				{
+					startTouch = true ;
+					startTouchId = touch.identifier;
+					break;
+				}
+	        }
+	        
         	
     	});
 	    //手机上用位移计算位置
 	    window.addEventListener('touchmove', function(e) {
 	        e.preventDefault();
-	        if(startTouch){
-	        	var moveX = e.touches[0].pageX;
-        		var moveY = e.touches[0].pageY;
-	        	var angle = angle1({x:x,y:y},{x:moveX,y:moveY});
-	        	angle = parseInt(angle);
-	        	if(onAngleListener){
-	        		onAngleListener(parseInt(angle));
-	        	}
-	        	var dist = dist1({x:moveX,y:moveY},{x:x,y:y});
-	        	if(dist > R){
-	        		angle = angle + 90;
-	        		var hudu = angle*2*Math.PI / 360;
-	        		var px = Math.sin(hudu)*R;
-	        		var py = Math.cos(hudu)*R;
-	        		offsetX = px ; 
-		        	offsetY = py ;
-		        	//log("R="+R + " angle="+hudu +" "+offsetX + ":"+offsetY + " sin="+Math.sin(hudu) + " cos="+Math.cos(hudu) );
-	        	}
-	        	else{
-		        	offsetX = moveX - x ; 
-		        	offsetY = moveY - y ;
+	        for(var i = 0 ; i < e.targetTouches.length ; i++){
+	        	if(e.targetTouches[i].identifier == startTouchId)
+	        	{
+	        		if(startTouch){
+			        	var moveX = e.touches[i].pageX;
+		        		var moveY = e.touches[i].pageY;
+			        	var angle = angle2({x:x,y:y},{x:moveX,y:moveY});
+			        	angle = parseInt(angle);
+			        	if(onAngleListener){
+			        		onAngleListener(parseInt(angle));
+			        	}
+			        	var dist = dist1({x:moveX,y:moveY},{x:x,y:y});
+			        	if(dist > R){
+			        		angle = angle + 90;
+			        		var hudu = angle*2*Math.PI / 360;
+			        		var px = Math.sin(hudu)*R;
+			        		var py = Math.cos(hudu)*R;
+			        		offsetX = px ; 
+				        	offsetY = py ;
+				        	//log("R="+R + " angle="+hudu +" "+offsetX + ":"+offsetY + " sin="+Math.sin(hudu) + " cos="+Math.cos(hudu) );
+			        	}
+			        	else{
+				        	offsetX = moveX - x ; 
+				        	offsetY = moveY - y ;
+			        	}
+			        }
+			        break;
 	        	}
 	        }
+
+	        
 	    });
 	    // 手机上停止触摸
 	    window.addEventListener('touchend', function(e) {
 	        e.preventDefault();
-	        startTouch = false ;
-	        offsetX = offsetY = 0;
+	        for(var i = 0 ; i < e.changedTouches.length ; i++){
+	        	if(e.changedTouches[i].identifier == startTouchId)
+	        	{
+	        		startTouch = false ;
+	        		offsetX = offsetY = 0;
+	        		startTouchId = -1 ;
+	        	}
+	        }
 	    });
 	}
 }
