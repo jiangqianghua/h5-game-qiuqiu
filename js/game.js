@@ -22,8 +22,8 @@ var Game = function(){
 		map.init(canvas,{});
 
 		directSimulator = new DirectionSimulator();
-		directSimulator.init(canvas,{x:100,y:100});
-
+		directSimulator.init(canvas,{x:150,y:200});
+		directSimulator.setOnAngleListener(this.onAngleCallback);
 
 	}
 
@@ -37,6 +37,10 @@ var Game = function(){
 	this.render = function(){
 		map.render();
 		directSimulator.render();
+	}
+
+	this.onAngleCallback = function(angle){
+		log("angle="+angle);
 	}
 }
 
