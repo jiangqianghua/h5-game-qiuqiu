@@ -51,7 +51,7 @@ var DirectionSimulator = function(){
 	        // 增加多点触控
 	        for(var i = 0 ; i < e.targetTouches.length ; i++){
 	        	var touch = e.targetTouches[i];
-		        log("touchstart:"+touch.identifier);
+		        //log("touchstart:"+touch.identifier);
 	        	var startX = e.touches[i].pageX;
 	        	var startY = e.touches[i].pageY;
 	        	// 计算到圆心的继续是否超出

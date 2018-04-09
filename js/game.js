@@ -1,6 +1,8 @@
 include('map.js')
 include('directionsimulator.js')
 include('ball.js')
+include('circlebutton.js')
+include('textview.js')
 var game ;
 var isOver = false;
 const raf = window.requestAnimationFrame
@@ -15,7 +17,9 @@ const raf = window.requestAnimationFrame
 var Game = function(){
 	var map ;
 	var directSimulator ;
-	var balls = [];
+	var myBalls = [];
+	var splitBtn ;
+	var titleView ;
 	this.init = function(){
 		canvas = e('game') ;
 		width = canvas.width;
@@ -25,7 +29,7 @@ var Game = function(){
 
 		directSimulator = new DirectionSimulator();
 		directSimulator.init(canvas,{x:150,y:200});
-		directSimulator.setOnAngleListener(this.onAngleCallback);
+
 
 	}
 
@@ -34,34 +38,55 @@ var Game = function(){
 	}
 
 	this.initEvent = function(){
+		directSimulator.setOnAngleListener(this.onAngleCallback);
+
+		splitBtn.setOnDownListener(function(e){
+			log("splitBtnTouchDown...");
+		});
+		splitBtn.setOnUpListener(function(e){
+			log("splitBtnTouchUp...");
+		});
+		splitBtn.setOnCancelListener(function(e){
+			log("splitBtnTouchCancle...");
+		});
 	}
 
 	this.render = function(){
 		map.render();
-
-		for(var i = 0 ; i < balls.length ; i++){
-			var ball = balls[i];
+		for(var i = 0 ; i < myBalls.length ; i++){
+			var ball = myBalls[i];
 			ball.update();
 			ball.render();
 		}
 
-
+		titleView.render();
 		directSimulator.render();
+		splitBtn.render();
 	}
 
 	this.onAngleCallback = function(angle){
-		log(angle);
-		for(var i = 0 ; i < balls.length ; i++){
-			var ball = balls[i];
+		//log(angle);
+		for(var i = 0 ; i < myBalls.length ; i++){
+			var ball = myBalls[i];
 			ball.direct(angle);
 		}
-
 	}
 
 	this.createBalls = function(){
 		var ball = new Ball();
 		ball.init(canvas,{x:100,y:100});
-		balls.push(ball);
+		myBalls.push(ball);
+	}
+
+	this.createSplitBtn = function(){
+		splitBtn = new CircleButton();
+		splitBtn.init(canvas,{x:100,y:900});
+	}
+
+	this.createTitleView = function(){
+		titleView = new TextView();
+		titleView.init(canvas,{x:100,y:300});
+		titleView.text("qiuqiudazuozan");
 	}
 }
 
@@ -79,8 +104,10 @@ window.onload = function(){
 	game = new Game();
 	game.init();
 	game.initData();
-	game.initEvent();
 	game.createBalls();
+	game.createSplitBtn();
+	game.createTitleView();
+	game.initEvent();
 	(function animate() {
 		if(isOver)
 			return ;
